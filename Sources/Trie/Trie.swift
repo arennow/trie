@@ -49,3 +49,22 @@ extension Trie {
 		}
 	}
 }
+
+extension Trie {
+	func elements(head: Array<Element> = []) -> Array<Array<Element>> {
+		self.children.reduce(into: []) { (arr, pair) in
+			let (elem, innerTrie) = pair
+			let base = head+[elem]
+			arr.append(contentsOf: innerTrie.elements(head: base))
+			if innerTrie.isNode {
+				arr.append(base)
+			}
+		}
+	}
+}
+
+extension Trie where Element == Character {
+	func strings() -> Array<String> {
+		self.elements().map { String($0) }
+	}
+}
