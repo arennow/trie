@@ -25,18 +25,28 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>
 */
 
-struct Trie<Element: Hashable>: Hashable {
-	var isNode: Bool = false
-	var children: Dictionary<Element, Trie<Element>> = [:]
+public struct Trie<Element: Hashable>: Hashable {
+	private var isNode: Bool
+	private var children: Dictionary<Element, Trie<Element>>
+	
+	public init() {
+		self.isNode = false
+		self.children = [:]
+	}
+	
+	private init(isNode: Bool, children: Dictionary<Element, Trie<Element>>) {
+		self.isNode = isNode
+		self.children = children
+	}
 }
 
 extension Trie {
-	func contains<C: Collection>(_ value: C) -> Bool where C.Element == Element {
+	public func contains<C: Collection>(_ value: C) -> Bool where C.Element == Element {
 		guard let nextElem = value.first else { return self.isNode }
 		return self.children[nextElem]?.contains(value.dropFirst()) ?? false
 	}
 	
-	mutating func insert<C: Collection>(_ value: C) where C.Element == Element {
+	public mutating func insert<C: Collection>(_ value: C) where C.Element == Element {
 		guard let nextElem = value.first else { self.isNode = true; return }
 		
 		if var existing = self.children[nextElem] {
@@ -50,7 +60,7 @@ extension Trie {
 	}
 	
 	@discardableResult
-	mutating func remove<C: Collection>(_ value: C) -> Bool where C.Element == Element {
+	public mutating func remove<C: Collection>(_ value: C) -> Bool where C.Element == Element {
 		guard let bits = decap(value) else {
 			self.isNode = false
 			return true
@@ -69,7 +79,7 @@ extension Trie {
 }
 
 extension Trie {
-	func elements(head: Array<Element> = []) -> Array<Array<Element>> {
+	public func elements(head: Array<Element> = []) -> Array<Array<Element>> {
 		self.children.reduce(into: []) { (arr, pair) in
 			let (elem, innerTrie) = pair
 			let base = head+[elem]
@@ -82,11 +92,11 @@ extension Trie {
 }
 
 extension Trie where Element == Character {
-	func strings() -> Array<String> {
+	public func strings() -> Array<String> {
 		self.elements().map { String($0) }
 	}
 	
-	func inspect(indentation: Int = 0) {
+	public func inspect(indentation: Int = 0) {
 		let tabs = String(repeating: " ", count: indentation)
 		for (c, t) in children {
 			print("\(tabs)\(c)\(t.isNode ? "*" : "")")
