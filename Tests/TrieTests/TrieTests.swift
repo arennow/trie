@@ -43,9 +43,27 @@ final class TrieTests: XCTestCase {
 		XCTAssertEqual(Set(trie.strings()), ["cartoon", "spoon", "car"])
 	}
 	
+	func testRemove() {
+		trie.insert("spoon")
+		trie.insert("cartoon")
+		trie.insert("car")
+		trie.insert("cars")
+		trie.insert("carbon")
+		trie.insert("carbons")
+		
+		XCTAssertTrue(trie.remove("carbons"))
+		XCTAssertFalse(trie.remove("cheetahs"))
+		
+		XCTAssertTrue(trie.contains("car"))
+		XCTAssertTrue(trie.contains("carbon"))
+		XCTAssertFalse(trie.contains("carbons"))
+		XCTAssertTrue(trie.contains("cartoon"))
+	}
+	
 	static var allTests = [
 		("testInsert", testInsert),
 		("testRetroactiveInsert", testRetroactiveInsert),
 		("testElementList", testElementList),
+		("testRemove", testRemove),
 	]
 }

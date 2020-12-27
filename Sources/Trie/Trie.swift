@@ -31,9 +31,9 @@ struct Trie<Element: Hashable>: Hashable {
 }
 
 extension Trie {
-	func contains<C: Collection>(_ col: C) -> Bool where C.Element == Element {
-		guard let nextElem = col.first else { return self.isNode }
-		return self.children[nextElem]?.contains(col.dropFirst()) ?? false
+	func contains<C: Collection>(_ value: C) -> Bool where C.Element == Element {
+		guard let nextElem = value.first else { return self.isNode }
+		return self.children[nextElem]?.contains(value.dropFirst()) ?? false
 	}
 	
 	mutating func insert<C: Collection>(_ value: C) where C.Element == Element {
@@ -47,6 +47,24 @@ extension Trie {
 			new.insert(value.dropFirst())
 			self.children[nextElem] = new
 		}
+	}
+	
+	@discardableResult
+	mutating func remove<C: Collection>(_ value: C) -> Bool where C.Element == Element {
+		guard let bits = decap(value) else {
+			self.isNode = false
+			return true
+		}
+		
+		guard var existingChild = self.children[bits.head] else { return false }
+		
+		let subResp = existingChild.remove(bits.tail)
+		if subResp && !existingChild.isNode && existingChild.children.isEmpty {
+			self.children.removeValue(forKey: bits.head)
+		} else {
+			self.children[bits.head] = existingChild
+		}
+		return subResp
 	}
 }
 
@@ -66,5 +84,13 @@ extension Trie {
 extension Trie where Element == Character {
 	func strings() -> Array<String> {
 		self.elements().map { String($0) }
+	}
+	
+	func inspect(indentation: Int = 0) {
+		let tabs = String(repeating: " ", count: indentation)
+		for (c, t) in children {
+			print("\(tabs)\(c)\(t.isNode ? "*" : "")")
+			t.inspect(indentation: indentation+1)
+		}
 	}
 }
